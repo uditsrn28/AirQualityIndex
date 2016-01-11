@@ -6,6 +6,8 @@ import android.airpolind.airpollutionindex.interfaces.ICallback;
 import android.airpolind.airpollutionindex.utils.CityMapping;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
@@ -101,23 +103,36 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         };
     }
 
-    private void setResults(AirIndex airIndex){
-        String result = "Place : "+airIndex.getTitle()+"\n" +
-                "Last Updated : "+airIndex.getDate()+"\n" ;
-        if(airIndex.getAirQualityIndex().getValue() > 0){
-            result = result + airIndex.getAirQualityIndex().getParam() +" : " + String.valueOf(airIndex.getAirQualityIndex().getValue())+ " \n" +
-                    "color : "+ airIndex.getAirQualityIndex().getColor()+" \n";
+    private void setResults(AirIndex airIndex) {
+        String result = "Place : " + airIndex.getTitle() + "\n" +
+                "Last Updated : " + airIndex.getDate() + "\n";
+        if (airIndex.getAirQualityIndex().getValue() > 0) {
+            result = result + airIndex.getAirQualityIndex().getParam() + " : " + String.valueOf(airIndex.getAirQualityIndex().getValue()) + " \n" +
+                    "color : " + airIndex.getAirQualityIndex().getColor() + " \n";
             enableButtonForMoreDetails(airIndex);
-        }else{
+        } else {
             result = result + "Air Index : Not Available";
             checkDetails.setVisibility(View.GONE);
         }
         resultTextView.setText(result);
     }
 
-    private void enableButtonForMoreDetails(AirIndex airIndex){
+    private void enableButtonForMoreDetails(AirIndex airIndex) {
         checkDetails.setVisibility(View.VISIBLE);
         checkDetails.setBackgroundColor(Color.parseColor(airIndex.getAirQualityIndex().getColor()));
-        //Set on click function
+        clickListener(airIndex);
+    }
+
+    private void clickListener(final AirIndex airIndex) {
+        checkDetails.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Bundle sendBundle = new Bundle();
+                Gson gson = new Gson();
+                sendBundle.putString("airIndexJson", gson.toJson(airIndex));
+                Intent i = new Intent(MainActivity.this, Details.class);
+                i.putExtras(sendBundle);
+                startActivity(i);
+            }
+        });
     }
 }
